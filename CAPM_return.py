@@ -5,6 +5,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import streamlit as st
 import yfinance as yf
+import CAPM_functions as fn
 
 
 ## Page configuration
@@ -33,7 +34,7 @@ with col2:
 
 dt = datetime.date
 end = dt.today()
-start = dt(dt.today().year - years, dt.today().month, dt.today().day)
+start = dt(dt.today().year - years, end.month, end.day)
 SP500 = web.DataReader(['SP500'], 'fred', start, end)
 
 stocks_df = pd.DataFrame()
@@ -68,3 +69,62 @@ else:
     with col2:
         st.markdown("### Dataframe tail")
         st.dataframe(stocks_df.tail(10), use_container_width = True)
+    
+    ## Plotting the CAPM return graph
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        st.markdown("### Price of all the stocks")
+        fig = fn.plot_capm_return(stocks_df)
+        st.plotly_chart(fig, use_container_width = True)
+    
+    with col2:
+        st.markdown("### Normalized Price of all the stocks")
+        normalized_df = fn.normalize_prices(stocks_df.copy())
+        fig = fn.plot_capm_return(normalized_df)
+        st.plotly_chart(fig, use_container_width = True)
+    
+    ## Calculating daily returns
+
+    stocks_daily_returns = fn.daily_returns(stocks_df.copy())
+    print(stocks_daily_returns.head(10))
+
+    ## Displaying daily returns
+
+    beta, alpha = {}, {}
+
+    for i in stocks_daily_returns.columns:
+        if i != 'Date' and i != 'SP500':
+            beta[i], alpha[i] = fn.calculate_beta(stocks_daily_returns, i)
+            #beta[i] = beta
+            #alpha[i] = alpha
+    
+    print(beta, alpha)
+
+    beta_df = pd.DataFrame(columns = ['Stock', 'Beta Value'])
+    beta_df['Stock'] = beta.keys()
+    beta_df['Beta Value'] = [str(round(i, 4)) for i in beta.values()]
+
+    with col1:
+        st.markdown("### Beta Values")
+        st.dataframe(beta_df, use_container_width = True)
+    
+    rf = 0
+    rm = stocks_daily_returns['SP500'].mean() * 252
+
+    return_df = pd.DataFrame()
+    return_value = []
+
+    for stock, value in beta.items():
+        return_value.append(str(round(rf + (value * (rm - rf)), 2)))
+    
+    return_df = pd.DataFrame(
+        {
+            'Stock': list(beta.keys()),
+            'Return Value': return_value
+        }
+    )
+
+    with col2:
+        st.markdown("### Calculated return using CAPM")
+        st.dataframe(return_df, use_container_width = True)
