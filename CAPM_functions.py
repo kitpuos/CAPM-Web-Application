@@ -1,7 +1,7 @@
 import numpy as np
 import plotly.express as px
 
-## Function to plot the CAPM return graph
+## Function to plot interactive plotly charts
 
 def plot_capm_return(df):
     fig = px.line()
