@@ -21,16 +21,16 @@ st.title("CAPM Return Calculator")
 
 ## Sidebar for inputs
 
-st.sidebar.header("User Inputs")
+st.header("User Inputs")
 
-selected_stocks = st.sidebar.multiselect("Select Stocks",
+selected_stocks = st.multiselect("Select Stocks",
                     options = ["AAPL", "GOOGL", "MSFT", "NFLX", "AMZN", "TSLA", "META", "NVDA", "JPM", "MGM"],
                     default = ["TSLA", "GOOGL", "AMZN", "META"])
-years = st.sidebar.number_input("Investment Duration (Years)", min_value = 1, max_value = 25, value = 1, step = 1)
+years = st.number_input("Investment Duration (Years)", min_value = 1, max_value = 25, value = 1, step = 1)
 
 
-st.sidebar.markdown("---")
-st.sidebar.info("Select your preferred stocks and duration, then view results in the tabs below.")
+#st.sidebar.markdown("---")
+#st.sidebar.info("Select your preferred stocks and duration, then view results in the tabs below.")
 
 ## Downloading stock data
 
@@ -102,6 +102,7 @@ try:
         'Stock': beta.keys(),
         'Beta Value': [str(round(i, 4)) for i in beta.values()]
     })
+    beta_df = beta_df.sort_values(by = 'Beta Value', ascending = False).reset_index(drop = True)
 
 
     with tab2:
@@ -120,10 +121,12 @@ try:
             'Return Value (%)': [round(rf + (value * (rm - rf)), 2) for value in beta.values()]
         }
     )
+    return_df = return_df.sort_values(by = 'Return Value (%)', ascending = False).reset_index(drop = True)
 
     # with col2:
     #     st.markdown("### Calculated return using CAPM")
     #     st.dataframe(return_df, use_container_width = True)
+    
     with tab3:
         st.markdown("### 📌 CAPM Formula")
         st.latex(r"E(R_i) = R_f + \beta_i (E(R_m) - R_f)")

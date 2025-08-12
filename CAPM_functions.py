@@ -1,5 +1,6 @@
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 
 ## Function to plot interactive plotly charts
 
@@ -44,3 +45,36 @@ def calculate_beta(stocks_daily_returns, stock):
     rm = stocks_daily_returns['SP500'].mean() * 252
     beta, alpha = np.polyfit(stocks_daily_returns['SP500'], stocks_daily_returns[stock], 1)
     return beta, alpha
+
+## New function for detailed beta regression plot (matching your reference image)
+def plot_beta_regression_detailed(daily_returns, stock, beta, alpha):
+    import plotly.graph_objects as go
+    import numpy as np
+
+    fig = go.Figure()
+
+    # Scatter points
+    fig.add_trace(go.Scatter(
+        x = daily_returns['SP500'], y = daily_returns[stock], mode = 'markers', name = 'Stock Returns',
+        marker = dict(color = 'blue', size = 8, opacity = 0.6), showlegend = False
+    ))
+
+    # Regression line
+    min_x = daily_returns['SP500'].min()
+    max_x = daily_returns['SP500'].max()
+
+    fig.add_trace(go.Scatter(
+        x = [min_x, max_x], y = [alpha + beta * min_x, alpha + beta * max_x], mode = 'lines',
+        name = f'Expected Return (β={beta:.2f})', line = dict(color = 'red', width = 2)
+    ))
+
+    # Layout changes for full width & top legend
+
+    fig.update_layout(
+        xaxis_title = "Market Returns (%)", yaxis_title = "Stock Returns (%)",
+        legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "center", x = 0.5),
+        margin = dict(l = 20, r = 20, t = 50, b = 20),
+        autosize = True
+    )
+
+    return fig
