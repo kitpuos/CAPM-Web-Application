@@ -6,7 +6,7 @@ import pandas as pd
 import pandas_datareader.data as web
 import streamlit as st
 import yfinance as yf
-import CAPM_functions as fn
+import utils.functions as fn
 
 ## Page configuration
 st.set_page_config(
