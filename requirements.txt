@@ -5,3 +5,4 @@ streamlit
 yfinance
 matplotlib
 plotly
+ta
